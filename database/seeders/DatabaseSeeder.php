@@ -81,6 +81,14 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
+        User::create([
+            'name' => 'Jane Smith',
+            'email' => 'cooperative@eProShop.com',
+            'password' => Hash::make('password'),
+            'role' => 'customer',
+            'cooperative_id' => $cooperative->id,
+            'email_verified_at' => now(),
+        ]);
 
         // Create Sample Products
         $electronics = Category::where('slug', 'electronics')->first();
