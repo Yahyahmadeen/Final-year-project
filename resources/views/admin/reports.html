@@ -1,0 +1,119 @@
+{% extends 'layouts/admin.html' %}
+
+{% block title %}Reports & Analytics{% endblock %}
+{% block page_title %}Reports & Analytics{% endblock %}
+
+{% block content %}
+<!-- Date Range Filter -->
+<div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">From Date</label>
+            <input type="date" name="date_from" value="{{ date_from }}" 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">To Date</label>
+            <input type="date" name="date_to" value="{{ date_to }}" 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+        </div>
+        <div class="flex items-end">
+            <button type="submit" class="w-full bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                <i class="fas fa-chart-bar mr-2"></i>Generate Report
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Sales Summary -->
+<div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
+    <h3 class="text-xl font-semibold text-gray-900 mb-6">Sales Summary</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="text-center">
+            <p class="text-sm text-gray-600 mb-2">Total Sales</p>
+            <p class="text-4xl font-bold text-gray-900">₦{{ sales_data.total_sales|floatformat:0|default:0 }}</p>
+        </div>
+        <div class="text-center">
+            <p class="text-sm text-gray-600 mb-2">Total Orders</p>
+            <p class="text-4xl font-bold text-blue-600">{{ sales_data.total_orders|default:0 }}</p>
+        </div>
+        <div class="text-center">
+            <p class="text-sm text-gray-600 mb-2">Average Order Value</p>
+            <p class="text-4xl font-bold text-green-600">₦{{ sales_data.avg_order_value|floatformat:0|default:0 }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Top Products -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Top Products</h3>
+        </div>
+        <div class="p-6">
+            <div class="space-y-4">
+                {% for product in top_products %}
+                <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                    <div>
+                        <p class="font-semibold text-gray-900">{{ product.product__name }}</p>
+                        <p class="text-sm text-gray-600">Sold: {{ product.total_sold }} units</p>
+                    </div>
+                    <p class="font-bold text-gray-900">₦{{ product.revenue|floatformat:0 }}</p>
+                </div>
+                {% empty %}
+                <p class="text-center text-gray-500 py-4">No data available</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Vendors -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Top Vendors</h3>
+        </div>
+        <div class="p-6">
+            <div class="space-y-4">
+                {% for vendor in top_vendors %}
+                <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                    <div>
+                        <p class="font-semibold text-gray-900">{{ vendor.product__vendor__store_name }}</p>
+                        <p class="text-sm text-gray-600">Orders: {{ vendor.total_orders }}</p>
+                    </div>
+                    <p class="font-bold text-gray-900">₦{{ vendor.total_sales|floatformat:0 }}</p>
+                </div>
+                {% empty %}
+                <p class="text-center text-gray-500 py-4">No data available</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cooperative Report -->
+<div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+    <h3 class="text-xl font-semibold text-gray-900 mb-6">Cooperative Loan Report</h3>
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+        <div class="text-center">
+            <p class="text-sm text-gray-600 mb-2">Total Requests</p>
+            <p class="text-3xl font-bold text-gray-900">{{ cooperative_data.total_requests|default:0 }}</p>
+        </div>
+        <div class="text-center">
+            <p class="text-sm text-gray-600 mb-2">Pending</p>
+            <p class="text-3xl font-bold text-yellow-600">{{ cooperative_data.pending|default:0 }}</p>
+        </div>
+        <div class="text-center">
+            <p class="text-sm text-gray-600 mb-2">Approved</p>
+            <p class="text-3xl font-bold text-blue-600">{{ cooperative_data.approved|default:0 }}</p>
+        </div>
+        <div class="text-center">
+            <p class="text-sm text-gray-600 mb-2">Paid</p>
+            <p class="text-3xl font-bold text-green-600">{{ cooperative_data.paid|default:0 }}</p>
+        </div>
+        <div class="text-center">
+            <p class="text-sm text-gray-600 mb-2">Total Amount</p>
+            <p class="text-3xl font-bold text-purple-600">₦{{ cooperative_data.total_amount|floatformat:0|default:0 }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

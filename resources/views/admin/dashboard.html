@@ -1,0 +1,314 @@
+{% extends 'layouts/admin.html' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Total Users -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Total Users</p>
+                <h3 class="text-3xl font-bold text-gray-900 mt-2">{{ total_users|default:0 }}</h3>
+                <p class="text-xs text-green-600 mt-2">
+                    <i class="fas fa-arrow-up"></i> +{{ new_users_week }} this week
+                </p>
+            </div>
+            <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-users text-2xl text-blue-600"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Orders -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Total Orders</p>
+                <h3 class="text-3xl font-bold text-gray-900 mt-2">{{ total_orders|default:0 }}</h3>
+                <p class="text-xs text-gray-500 mt-2">{{ pending_orders }} pending</p>
+            </div>
+            <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-shopping-cart text-2xl text-green-600"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Revenue -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Total Revenue</p>
+                <h3 class="text-3xl font-bold text-gray-900 mt-2">₦{{ total_revenue|floatformat:0|default:0 }}</h3>
+                <p class="text-xs text-gray-500 mt-2">₦{{ revenue_this_month|floatformat:0 }} this month</p>
+            </div>
+            <div class="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-dollar-sign text-2xl text-purple-600"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cooperatives -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Active Cooperatives</p>
+                <h3 class="text-3xl font-bold text-gray-900 mt-2">{{ total_cooperatives|default:0 }}</h3>
+                <p class="text-xs text-gray-500 mt-2">{{ total_fenco_users }} members</p>
+            </div>
+            <div class="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-handshake text-2xl text-orange-600"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Secondary Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <!-- Products -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+            <h4 class="text-lg font-semibold text-gray-900">Products</h4>
+            <i class="fas fa-box text-gray-400"></i>
+        </div>
+        <div class="space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Total Products</span>
+                <span class="font-semibold text-gray-900">{{ total_products }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Active</span>
+                <span class="font-semibold text-green-600">{{ active_products }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Low Stock</span>
+                <span class="font-semibold text-red-600">{{ low_stock_products }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Methods -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+            <h4 class="text-lg font-semibold text-gray-900">Payment Methods</h4>
+            <i class="fas fa-credit-card text-gray-400"></i>
+        </div>
+        <div class="space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Paystack</span>
+                <span class="font-semibold text-gray-900">₦{{ paystack_revenue|floatformat:0 }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Cooperative</span>
+                <span class="font-semibold text-blue-600">₦{{ cooperative_revenue|floatformat:0 }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Bank Transfer</span>
+                <span class="font-semibold text-gray-900">₦{{ bank_transfer_revenue|floatformat:0 }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cooperative Loans -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+            <h4 class="text-lg font-semibold text-gray-900">Loan Requests</h4>
+            <i class="fas fa-file-invoice-dollar text-gray-400"></i>
+        </div>
+        <div class="space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Pending</span>
+                <span class="font-semibold text-yellow-600">{{ pending_loan_requests }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Approved</span>
+                <span class="font-semibold text-green-600">{{ approved_loan_requests }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Total Financed</span>
+                <span class="font-semibold text-gray-900">₦{{ total_cooperative_loans|floatformat:0 }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Revenue Chart -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <h4 class="text-lg font-semibold text-gray-900 mb-4">Monthly Revenue</h4>
+        <div style="position: relative; height: 300px;">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Order Status Chart -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <h4 class="text-lg font-semibold text-gray-900 mb-4">Order Status Distribution</h4>
+        <div style="position: relative; height: 300px;">
+            <canvas id="orderStatusChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Recent Orders -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h4 class="text-lg font-semibold text-gray-900">Recent Orders</h4>
+                <a href="{% url 'admin_orders' %}" class="text-sm text-blue-600 hover:text-blue-700">View All</a>
+            </div>
+        </div>
+        <div class="p-6">
+            <div class="space-y-4">
+                {% for order in recent_orders %}
+                <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                    <div class="flex-1">
+                        <p class="font-semibold text-gray-900">{{ order.order_number }}</p>
+                        <p class="text-sm text-gray-600">{{ order.user.email }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-semibold text-gray-900">₦{{ order.total_amount|floatformat:0 }}</p>
+                        <span class="inline-block px-2 py-1 text-xs rounded-full 
+                            {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                            {% elif order.status == 'processing' %}bg-blue-100 text-blue-800
+                            {% elif order.status == 'delivered' %}bg-green-100 text-green-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center py-4">No recent orders</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Users -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h4 class="text-lg font-semibold text-gray-900">Recent Users</h4>
+                <a href="{% url 'admin_users' %}" class="text-sm text-blue-600 hover:text-blue-700">View All</a>
+            </div>
+        </div>
+        <div class="p-6">
+            <div class="space-y-4">
+                {% for user in recent_users %}
+                <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                            {{ user.first_name.0|default:user.username.0|upper }}
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900">{{ user.get_full_name|default:user.username }}</p>
+                            <p class="text-sm text-gray-600">{{ user.email }}</p>
+                        </div>
+                    </div>
+                    <span class="inline-block px-3 py-1 text-xs rounded-full 
+                        {% if user.role == 'admin' %}bg-red-100 text-red-800
+                        {% elif user.role == 'vendor' %}bg-purple-100 text-purple-800
+                        {% elif user.is_cooperative_member %}bg-blue-100 text-blue-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ user.display_type }}
+                    </span>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center py-4">No recent users</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Revenue Chart
+    const revenueData = {{ monthly_revenue|safe }};
+    const revenueCanvas = document.getElementById('revenueChart');
+    
+    if (revenueCanvas && revenueData && revenueData.length > 0) {
+        const revenueCtx = revenueCanvas.getContext('2d');
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: revenueData.map(d => d.month),
+                datasets: [{
+                    label: 'Revenue (₦)',
+                    data: revenueData.map(d => d.revenue),
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '₦' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } else {
+        console.error('Revenue chart: Canvas element not found or no data');
+    }
+
+    // Order Status Chart
+    const orderStatusData = {{ order_status_data|safe }};
+    const statusCanvas = document.getElementById('orderStatusChart');
+    
+    if (statusCanvas && orderStatusData && orderStatusData.length > 0) {
+        const statusCtx = statusCanvas.getContext('2d');
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: orderStatusData.map(d => d.status.charAt(0).toUpperCase() + d.status.slice(1)),
+                datasets: [{
+                    data: orderStatusData.map(d => d.count),
+                    backgroundColor: [
+                        'rgb(251, 191, 36)',
+                        'rgb(59, 130, 246)',
+                        'rgb(34, 197, 94)',
+                        'rgb(239, 68, 68)',
+                        'rgb(168, 85, 247)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 1.5,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    } else {
+        console.error('Order status chart: Canvas element not found or no data');
+    }
+});
+</script>
+{% endblock %}

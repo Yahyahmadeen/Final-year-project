@@ -1,0 +1,19 @@
+@extends('layouts.app-layout')
+
+@section('content')
+    @if(isset($header))
+        <div class="py-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-2xl font-semibold text-gray-900">
+                    {{ $header }}
+                </h2>
+            </div>
+        </div>
+    @endif
+
+    <div class="py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            @yield('main-content', $slot ?? '')
+        </div>
+    </div>
+@endsection
