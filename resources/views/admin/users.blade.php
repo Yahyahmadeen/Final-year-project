@@ -4,6 +4,12 @@
 @section('page_title', 'Users')
 
 @section('content')
+@if(session('success'))
+<div class="mb-4 p-4 bg-green-50 border border-green-200 text-green-800 rounded-lg">
+    {{ session('success') }}
+</div>
+@endif
+
 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-semibold text-gray-900">All Users</h2>
@@ -50,7 +56,7 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $user->created_at->format('M d, Y') }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="#" class="text-primary-600 hover:text-primary-900">Edit</a>
+                        <a href="{{ route('admin.users.edit', $user) }}" class="text-primary-600 hover:text-primary-900">Edit</a>
                     </td>
                 </tr>
                 @endforeach

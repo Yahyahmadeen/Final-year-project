@@ -99,7 +99,17 @@ class Product extends Model
 
     public function images()
     {
-        return $this->hasMany(ProductImage::class);
+        return $this->hasMany(ProductImage::class)->orderBy('is_primary', 'desc')->orderBy('created_at');
+    }
+    
+    public function imagesFirst()
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('is_primary', 'desc')->orderBy('created_at');
+    }
+    
+    public function firstImage()
+    {
+        return $this->hasOne(ProductImage::class)->orderBy('is_primary', 'desc')->orderBy('created_at');
     }
 
     // Helper methods

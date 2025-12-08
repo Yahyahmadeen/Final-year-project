@@ -37,6 +37,8 @@ Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/users', [\App\Http\Controllers\AdminController::class, 'users'])->name('users');
+    Route::get('/users/{user}/edit', [\App\Http\Controllers\AdminController::class, 'editUser'])->name('users.edit');
+    Route::put('/users/{user}', [\App\Http\Controllers\AdminController::class, 'updateUser'])->name('users.update');
     Route::get('/orders', [\App\Http\Controllers\AdminController::class, 'orders'])->name('orders');
     Route::get('/products', [\App\Http\Controllers\AdminController::class, 'products'])->name('products');
     Route::get('/payments', [\App\Http\Controllers\AdminController::class, 'payments'])->name('payments');
@@ -120,7 +122,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('vendor')->name('vendor.')->middleware(['auth'])->group(function () {
         Route::get('/dashboard', [VendorController::class, 'dashboard'])->name('dashboard');
         Route::get('/products', [VendorProductController::class, 'index'])->name('products.index');
-        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+        
+        // Vendor Order Routes
+        Route::get('/orders', [\App\Http\Controllers\VendorOrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [\App\Http\Controllers\VendorOrderController::class, 'show'])->name('orders.show');
+        Route::put('/orders/{order}/status', [\App\Http\Controllers\VendorOrderController::class, 'updateStatus'])->name('orders.update-status');
+        
         Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
         Route::post('/inventory/{product}/stock', [InventoryController::class, 'updateStock'])->name('inventory.stock.update');
         Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');

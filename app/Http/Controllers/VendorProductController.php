@@ -39,8 +39,14 @@ class VendorProductController extends Controller
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB max per file
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // 10MB max per file
         ]);
+
+        // Generate slug and SKU
+        $validated['slug'] = \Illuminate\Support\Str::slug($validated['name']) . '-' . time();
+        $validated['sku'] = 'PRD-' . strtoupper(substr(uniqid(), -8));
+        $validated['status'] = 'published'; // Default status
+        $validated['stock_status'] = $validated['stock_quantity'] > 0 ? 'in_stock' : 'out_of_stock';
 
         // Create the product
         $product = auth()->user()->vendor->products()->create($validated);
@@ -48,13 +54,16 @@ class VendorProductController extends Controller
         // Handle file uploads
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $path = $image->store('products/' . $product->id, 'public');
-                $product->images()->create(['path' => $path]);
+                $path = $image->store('products', 'public');
+                $product->images()->create([
+                    'path' => $path,
+                    'is_primary' => $product->images()->count() === 0 // First image is primary
+                ]);
             }
         }
 
         return redirect()->route('vendor.products.index')
-            ->with('success', 'Product created successfully!');
+            ->with('success', 'Product created successfully with ' . ($request->hasFile('images') ? count($request->file('images')) : 0) . ' image(s)!');
     }
 
 }

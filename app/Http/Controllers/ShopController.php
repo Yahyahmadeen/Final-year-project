@@ -10,9 +10,9 @@ use Illuminate\View\View;
 
 class ShopController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request)
     {
-        $query = Product::with(['vendor', 'category'])
+        $query = Product::with(['imagesFirst','images','vendor', 'category'])
             ->where('status', 'published');
 
         // Search functionality
@@ -67,8 +67,9 @@ class ShopController extends Controller
                 $query->orderBy($sortBy, $sortOrder);
         }
 
-        $products = $query->paginate(12)->withQueryString();
+        $products = $query->get();
 
+        // return $products;
         $categories = Category::where('is_active', true)
             ->whereNull('parent_id')
             ->withCount('products')

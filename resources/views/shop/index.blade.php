@@ -57,6 +57,46 @@
             background-color: #f3f4f6;
             border-color: #e5e7eb;
         }
+        
+        /* Toast animations */
+        .animate-fade-in-down {
+            animation: fadeInDown 0.3s ease-in-out forwards;
+        }
+        .animate-fade-out {
+            animation: fadeOut 0.3s ease-in-out forwards;
+        }
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+        
+        /* Improved product card */
+        .product-card {
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .product-card:hover {
+            border-color: #e5e7eb;
+        }
+        .naira-symbol {
+            font-family: Arial, sans-serif;
+        }
     </style>
 @endpush
 
@@ -171,15 +211,29 @@
                     cartCount.textContent = data.cart_count;
                 }
                 
-                // Show success message
-                const message = document.createElement('div');
-                message.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-                message.textContent = 'Product added to cart!';
-                document.body.appendChild(message);
+                // Show success toast
+                const successToast = document.createElement('div');
+                successToast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 animate-fade-in-down flex items-center';
+                successToast.innerHTML = `
+                    <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <div>
+                        <p class="font-medium">Product added to cart!</p>
+                        <p class="text-xs text-white/80">Continue shopping or go to cart</p>
+                    </div>
+                    <button class="ml-4 p-1 hover:bg-white/20 rounded" onclick="window.location.href='{{ route('cart.index') }}'">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </button>
+                `;
+                document.body.appendChild(successToast);
                 
-                // Remove message after 3 seconds
+                // Remove toast after 3 seconds with fade out animation
                 setTimeout(() => {
-                    message.remove();
+                    successToast.classList.add('animate-fade-out');
+                    setTimeout(() => successToast.remove(), 300);
                 }, 3000);
                 
                 // Reset quantity selector
@@ -192,7 +246,25 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred while adding the product to cart.');
+                
+                // Show error toast instead of alert
+                const errorToast = document.createElement('div');
+                errorToast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in-down';
+                errorToast.innerHTML = `
+                    <div class="flex items-center">
+                        <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>An error occurred while adding the product to cart.</span>
+                    </div>
+                `;
+                document.body.appendChild(errorToast);
+                
+                // Remove toast after 3 seconds
+                setTimeout(() => {
+                    errorToast.classList.add('animate-fade-out');
+                    setTimeout(() => errorToast.remove(), 300);
+                }, 3000);
             })
             .finally(() => {
                 addButton.disabled = false;
@@ -211,7 +283,7 @@
                 <div>
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Shop</h1>
                     <p class="text-gray-600 mt-1">
-                        {{ $products->total() }} {{ Str::plural('product', $products->total()) }} found
+                        {{ $products->count() }} {{ Str::plural('product', $products->count()) }} found
                     </p>
                 </div>
                 
@@ -315,27 +387,52 @@
         </div>
     </div>
 
+    <!-- Featured Categories -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <h2 class="text-xl font-bold mb-4 text-gray-800">Shop by Category</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            @foreach($categories->take(6) as $category)
+            <a href="{{ route('shop', ['category' => $category->slug]) }}" class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all text-center border border-gray-100">
+                <div class="w-12 h-12 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg class="h-6 w-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-sm font-medium text-gray-800">{{ $category->name }}</h3>
+                <p class="text-xs text-gray-500 mt-1">{{ $category->products_count }} items</p>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    
     <!-- Products Grid -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         @if($products->count() > 0)
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                <svg class="h-6 w-6 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                </svg>
+                Our Products
+            </h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
                 @foreach($products as $product)
                     <div class="product-card bg-white rounded-xl overflow-hidden border border-gray-100">
                         <div class="relative">
-                            <div class="product-image aspect-square flex items-center justify-center bg-gray-100">
                                 @php
-                                    $images = is_array($product->images) ? $product->images : json_decode($product->images, true);
-                                    $firstImage = is_array($images) && count($images) > 0 ? $images[0] : null;
+                                    $primaryImage = $product->imagesFirst->first()?->path ?? 'placeholder.jpg';
                                 @endphp
-                                
-                                @if($firstImage && is_string($firstImage))
-                                    <img src="{{ asset('storage/' . $firstImage) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                            <div class="product-image aspect-square flex items-center justify-center bg-gray-100 overflow-hidden">
+
+                                <img src="{{ asset('storage/' . $primaryImage) }}" alt="{{ $product->name }}" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300">
+                                {{-- @if($firstImage)
                                 @else
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
+                                    <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
                                 @endif
-                                
+                                 --}}
                                 @if($product->sale_price && $product->sale_price < $product->price)
                                     <div class="discount-badge">
                                         -{{ number_format((($product->price - $product->sale_price) / $product->price) * 100, 0) }}%
@@ -378,11 +475,11 @@
                             <div class="space-y-2">
                                 <div class="flex flex-col">
                                     <span class="text-sm sm:text-base font-bold text-gray-900">
-                                        {{ number_format($product->sale_price ?? $product->price, 2) }} MAD
+                                        ₦{{ number_format($product->sale_price ?? $product->price, 0) }}
                                     </span>
                                     @if($product->sale_price && $product->sale_price < $product->price)
                                         <span class="text-xs text-gray-500 line-through">
-                                            {{ number_format($product->price, 2) }} MAD
+                                            ₦{{ number_format($product->price, 0) }}
                                         </span>
                                     @endif
                                 </div>
@@ -460,12 +557,12 @@
                 @endforeach
             </div>
             
-            <!-- Pagination -->
+            {{-- <!-- Pagination -->
             @if($products->hasPages())
                 <div class="mt-8">
                     {{ $products->withQueryString()->links() }}
                 </div>
-            @endif
+            @endif --}}
         @else
             <div class="text-center py-12">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

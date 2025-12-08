@@ -1,5 +1,40 @@
 @extends('layouts.app')
 
+@push('styles')
+<style>
+    .animate-fade-in-down {
+        animation: fadeInDown 0.3s ease-in-out forwards;
+    }
+    .animate-fade-out {
+        animation: fadeOut 0.3s ease-in-out forwards;
+    }
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+        }
+    }
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+@endpush
+
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -12,12 +47,40 @@
             function updateQuantity(newQuantity) {
                 if (newQuantity >= 1 && newQuantity <= Math.min(10, maxQuantity)) {
                     quantityInput.value = newQuantity;
+                    
+                    // Update hidden form input
+                    const formQuantityInput = document.getElementById('form-quantity');
+                    if (formQuantityInput) {
+                        formQuantityInput.value = newQuantity;
+                    }
+                    
+                    // Update button states with visual feedback
                     minusBtn.disabled = newQuantity <= 1;
                     plusBtn.disabled = newQuantity >= Math.min(10, maxQuantity);
+                    
+                    // Add visual feedback for disabled buttons
+                    if (newQuantity <= 1) {
+                        minusBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        minusBtn.classList.remove('hover:bg-gray-100');
+                    } else {
+                        minusBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        minusBtn.classList.add('hover:bg-gray-100');
+                    }
+                    
+                    if (newQuantity >= Math.min(10, maxQuantity)) {
+                        plusBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        plusBtn.classList.remove('hover:bg-gray-100');
+                    } else {
+                        plusBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        plusBtn.classList.add('hover:bg-gray-100');
+                    }
                 }
             }
 
             if (minusBtn && plusBtn && quantityInput) {
+                // Initialize button states
+                updateQuantity(1);
+                
                 minusBtn.addEventListener('click', () => {
                     updateQuantity(parseInt(quantityInput.value) - 1);
                 });
@@ -30,6 +93,13 @@
                     let value = parseInt(e.target.value) || 1;
                     value = Math.max(1, Math.min(Math.min(10, maxQuantity), value));
                     updateQuantity(value);
+                });
+                
+                // Prevent form submission on Enter key in quantity input
+                quantityInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                    }
                 });
             }
 
@@ -61,7 +131,7 @@
                         },
                         body: JSON.stringify({
                             product_id: {{ $product->id }},
-                            quantity: quantityInput.value
+                            quantity: parseInt(quantityInput.value)
                         })
                     })
                     .then(response => response.json())
@@ -72,12 +142,12 @@
                             cartCount.textContent = data.cart_count;
                         }
                         
-                        // Show success message
-                        alert('Product added to cart successfully!');
+                        // Show success toast
+                        showToast('Product added to cart successfully!');
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('An error occurred while adding the product to cart.');
+                        showToast('An error occurred while adding the product to cart.', 'error');
                     })
                     .finally(() => {
                         submitBtn.disabled = false;
@@ -116,7 +186,7 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('An error occurred while updating your wishlist.');
+                        showToast('An error occurred while updating your wishlist.', 'error');
                     });
                 });
             }
@@ -143,6 +213,54 @@
                 });
             });
         });
+
+        // Function to change main image
+        function changeMainImage(imageSrc, imageIndex) {
+            const mainImage = document.getElementById('main-image');
+            if (mainImage) {
+                mainImage.src = imageSrc;
+            }
+            
+            // Update image counter
+            const imageCounter = document.querySelector('.absolute.top-4.right-4');
+            if (imageCounter && imageIndex) {
+                const totalImages = document.querySelectorAll('.thumbnail-btn').length;
+                imageCounter.textContent = `${imageIndex} / ${totalImages}`;
+            }
+            
+            // Update active thumbnail
+            document.querySelectorAll('.thumbnail-btn').forEach(btn => {
+                btn.classList.remove('border-primary-500', 'ring-2', 'ring-primary-200');
+                btn.classList.add('border-gray-200');
+            });
+            
+            // Find and highlight the clicked thumbnail
+            const clickedThumbnail = document.querySelector(`[onclick*="${imageSrc}"]`);
+            if (clickedThumbnail) {
+                clickedThumbnail.classList.remove('border-gray-200');
+                clickedThumbnail.classList.add('border-primary-500', 'ring-2', 'ring-primary-200');
+            }
+        }
+
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-down flex items-center ${
+                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            }`;
+            
+            const icon = type === 'success' 
+                ? '<svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>'
+                : '<svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+            
+            toast.innerHTML = `${icon}<span>${message}</span>`;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('animate-fade-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        });
     </script>
 @endpush
 
@@ -166,56 +284,95 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <!-- Product Images -->
-            <div class="space-y-4">
-                <!-- Main Image -->
-                <div class="aspect-square bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center overflow-hidden">
-                    @if($product->images?->count() > 0)
-                        <img src="{{ $product->images->first()->getUrl() }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
-                    @else
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-32 w-32 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    @endif
-                </div>
-                
-                <!-- Thumbnail Images -->
-                <div class="grid grid-cols-4 gap-4">
-                    @forelse($product->images ?? [] as $index => $image)
-                        <button
-                            class="aspect-square bg-white rounded-xl border-2 flex items-center justify-center overflow-hidden transition-colors {{ $index === 0 ? 'border-primary-500' : 'border-gray-200 hover:border-gray-300' }}"
-                        >
-                            <img src="{{ $image->getUrl('thumb') }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
-                        </button>
-                    @empty
-                        @for($i = 0; $i < 4; $i++)
-                            <div class="aspect-square bg-gray-100 rounded-xl border-2 border-gray-200 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+            <!-- Product Images Section -->
+            <div class="sticky top-8">
+                <div class="space-y-4">
+                    <!-- Main Image -->
+                    <div class="relative">
+                        <div class="aspect-square bg-white rounded-3xl shadow-xl border border-gray-100 flex items-center justify-center overflow-hidden group">
+                            @if($product->imagesFirst && count($product->imagesFirst) > 0)
+                                @php
+                                    $primaryImage = collect($product->imagesFirst)->where('is_primary', 1)->first() ?? collect($product->imagesFirst)->first();
+                                @endphp
+                                <img id="main-image" src="{{ asset('storage/' . $primaryImage['path']) }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            @else
+                                <div class="flex flex-col items-center justify-center text-gray-400 p-12">
+                                    <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <p class="text-lg font-medium text-gray-500">No Image Available</p>
+                                    <p class="text-sm text-gray-400 mt-1">Product image will appear here</p>
+                                </div>
+                            @endif
+                        </div>
+                        
+                        <!-- Image Counter Badge -->
+                        @if($product->imagesFirst && count($product->imagesFirst) > 1)
+                            <div class="absolute top-4 right-4 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                1 / {{ count($product->imagesFirst) }}
                             </div>
-                        @endfor
-                    @endforelse
+                        @endif
+                    </div>
+                    
+                    <!-- Thumbnail Images -->
+                    @if($product->imagesFirst && count($product->imagesFirst) > 1)
+                    <div class="grid grid-cols-5 gap-3">
+                        @foreach($product->imagesFirst as $index => $image)
+                            <button
+                                onclick="changeMainImage('{{ asset('storage/' . $image['path']) }}', {{ $index + 1 }})"
+                                class="thumbnail-btn aspect-square bg-white rounded-xl border-2 flex items-center justify-center overflow-hidden transition-all hover:shadow-lg {{ $index === 0 ? 'border-primary-500 ring-2 ring-primary-200' : 'border-gray-200 hover:border-primary-300' }}"
+                            >
+                                <img src="{{ asset('storage/' . $image['path']) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                            </button>
+                        @endforeach
+                    </div>
+                    @endif
                 </div>
             </div>
 
-            <!-- Product Info -->
-            <div class="space-y-6">
-                <!-- Back Button -->
-                <a href="{{ route('shop') }}" class="inline-flex items-center text-gray-600 hover:text-primary-600 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Back to Shop
-                </a>
+            <!-- Product Information Section -->
+            <div class="space-y-8">
+                <!-- Breadcrumb & Back Button -->
+                <div class="flex items-center justify-between">
+                    <a href="{{ route('shop') }}" class="inline-flex items-center text-gray-600 hover:text-primary-600 transition-colors bg-gray-50 hover:bg-gray-100 px-4 py-2 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Back to Shop
+                    </a>
+                    
+                    <!-- Wishlist & Share Buttons -->
+                    <div class="flex items-center space-x-2">
+                        <button id="wishlist-btn" class="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                        </button>
+                        <button class="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 
                 <!-- Product Title & Vendor -->
-                <div>
-                    <h1 class="text-3xl font-bold text-secondary-800 mb-2">{{ $product->name }}</h1>
-                    <a href="{{ route('vendors.show', $product->vendor->slug) }}" class="text-primary-600 hover:text-primary-700 font-medium">
-                        by {{ $product->vendor->store_name ?? $product->vendor->name }}
-                    </a>
+                <div class="space-y-3">
+                    <div class="flex items-center space-x-2 text-sm">
+                        <span class="bg-primary-100 text-primary-800 px-3 py-1 rounded-full font-medium">{{ $product->category->name }}</span>
+                        <span class="text-gray-400">•</span>
+                        <span class="text-gray-600">SKU: {{ $product->sku }}</span>
+                    </div>
+                    <h1 class="text-4xl font-bold text-gray-900 leading-tight">{{ $product->name }}</h1>
+                    <div class="flex items-center space-x-3">
+                        <a href="#" class="text-primary-600 hover:text-primary-700 font-semibold text-lg">
+                            {{ $product->vendor->store_name ?? $product->vendor->name }}
+                        </a>
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">Verified Seller</span>
+                    </div>
                 </div>
 
                 <!-- Rating -->
@@ -238,19 +395,30 @@
                     </span>
                 </div>
 
-                <!-- Price -->
-                <div class="flex items-center space-x-4">
-                    <span class="text-4xl font-bold text-secondary-800">
-                        {{ number_format($product->sale_price ?? $product->price, 2) }} MAD
-                    </span>
-                    @if($product->sale_price && $product->sale_price < $product->price)
-                        <span class="text-xl text-gray-500 line-through">
-                            {{ number_format($product->price, 2) }} MAD
+                <!-- Price Section -->
+                <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6 border border-gray-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Price</h3>
+                        @if($product->sale_price && $product->sale_price < $product->price)
+                            <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+                                SAVE {{ number_format((($product->price - $product->sale_price) / $product->price) * 100, 0) }}%
+                            </span>
+                        @endif
+                    </div>
+                    <div class="flex items-baseline space-x-3">
+                        <span class="text-4xl font-bold text-primary-600">
+                            ₦{{ number_format($product->sale_price ?? $product->price, 0) }}
                         </span>
-                        <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">
-                            {{ number_format((($product->price - $product->sale_price) / $product->price) * 100, 0) }}% OFF
-                        </span>
-                    @endif
+                        @if($product->sale_price && $product->sale_price < $product->price)
+                            <span class="text-xl text-gray-500 line-through">
+                                ₦{{ number_format($product->price, 0) }}
+                            </span>
+                            <span class="text-green-600 font-semibold">
+                                You save ₦{{ number_format($product->price - $product->sale_price, 0) }}
+                            </span>
+                        @endif
+                    </div>
+                    <p class="text-sm text-gray-600 mt-2">Inclusive of all taxes • Free shipping on orders over ₦50,000</p>
                 </div>
 
                 <!-- Stock Status -->
@@ -271,72 +439,101 @@
                     @endif
                 </div>
 
-                <!-- Quantity & Add to Cart -->
+                <!-- Purchase Section -->
                 @if($product->stock_quantity > 0)
-                    <div class="space-y-4">
-                        <div class="flex items-center space-x-4">
-                            <span class="text-gray-700 font-medium">Quantity:</span>
-                            <div class="flex items-center space-x-2">
-                                <button
-                                    data-action="decrement"
-                                    class="w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    {{ $product->stock_quantity <= 1 ? 'disabled' : '' }}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
-                                    </svg>
-                                </button>
-                                <input
-                                    type="number"
-                                    id="quantity"
-                                    name="quantity"
-                                    min="1"
-                                    max="{{ min(10, $product->stock_quantity) }}"
-                                    value="1"
-                                    class="w-16 text-center border-0 text-xl font-semibold focus:ring-0"
-                                >
-                                <button
-                                    data-action="increment"
-                                    class="w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    {{ $product->stock_quantity <= 1 ? 'disabled' : '' }}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                </button>
+                    <div class="bg-white border-2 border-primary-200 rounded-2xl p-6 space-y-6">
+                        <h3 class="text-lg font-semibold text-gray-800">Purchase Options</h3>
+                        
+                        <!-- Quantity Selector -->
+                        <div class="space-y-3">
+                            <label class="text-sm font-medium text-gray-700 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                                </svg>
+                                Quantity
+                            </label>
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center border-2 border-gray-300 rounded-xl overflow-hidden bg-white shadow-sm">
+                                    <button
+                                        type="button"
+                                        data-action="decrement"
+                                        class="px-4 py-3 text-gray-600 hover:bg-gray-100 transition-all font-semibold hover:text-primary-600 active:bg-gray-200"
+                                        title="Decrease quantity"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                        </svg>
+                                    </button>
+                                    <input
+                                        type="number"
+                                        id="quantity"
+                                        value="1"
+                                        min="1"
+                                        max="{{ min(10, $product->stock_quantity) }}"
+                                        class="w-20 text-center border-0 focus:ring-0 py-3 font-bold text-lg text-gray-800 bg-gray-50"
+                                        readonly
+                                    >
+                                    <button
+                                        type="button"
+                                        data-action="increment"
+                                        class="px-4 py-3 text-gray-600 hover:bg-gray-100 transition-all font-semibold hover:text-primary-600 active:bg-gray-200"
+                                        title="Increase quantity"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-medium text-gray-700">{{ $product->stock_quantity }} available</span>
+                                    <span class="text-xs text-gray-500">Max 10 per order</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="flex space-x-4">
-                            <form id="add-to-cart-form" action="{{ route('cart.add') }}" method="POST" class="flex-1">
+                        <!-- Action Buttons -->
+                        <div class="space-y-3">
+                            <form id="add-to-cart-form" action="{{ route('cart.add') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                <input type="hidden" name="quantity" id="form-quantity" value="1">
                                 <button
                                     type="submit"
-                                    class="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3 px-6 rounded-2xl font-semibold hover:from-primary-600 hover:to-primary-700 focus:ring-4 focus:ring-primary-200 transition-all duration-300 flex items-center justify-center space-x-2"
+                                    class="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-primary-700 hover:to-primary-800 transition-all transform hover:scale-105 flex items-center justify-center space-x-3 shadow-lg"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
                                     <span>Add to Cart</span>
                                 </button>
                             </form>
                             
-                            <button
-                                id="wishlist-btn"
-                                class="p-3 border-2 border-gray-300 hover:border-red-300 rounded-2xl transition-colors"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 {{ $inWishlist ? 'text-red-500 fill-current' : 'text-gray-400 hover:text-red-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                </svg>
-                            </button>
-                            
-                            <button class="p-3 border-2 border-gray-300 hover:border-gray-400 rounded-2xl transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                                </svg>
-                            </button>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button class="flex items-center justify-center space-x-2 py-3 px-4 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                    <span class="text-sm font-medium">Wishlist</span>
+                                </button>
+                                <button class="flex items-center justify-center space-x-2 py-3 px-4 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                                    </svg>
+                                    <span class="text-sm font-medium">Share</span>
+                                </button>
+                            </div>
                         </div>
+                    </div>
+                @else
+                    <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-6 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-400 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 class="text-lg font-semibold text-red-800 mb-2">Out of Stock</h3>
+                        <p class="text-red-600">This product is currently unavailable</p>
+                        <button class="mt-4 px-6 py-2 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 transition-colors">
+                            Notify When Available
+                        </button>
                     </div>
                 @endif
 
@@ -514,8 +711,8 @@
                             class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
                         >
                             <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
-                                @if($relatedProduct->images?->count() > 0)
-                                    <img src="{{ $relatedProduct->images->first()->getUrl('medium') }}" alt="{{ $relatedProduct->name }}" class="w-full h-full object-cover">
+                                @if($relatedProduct->imagesFirst && count($relatedProduct->imagesFirst) > 0)
+                                    <img src="{{ asset('storage/' . $relatedProduct->imagesFirst[0]['path']) }}" alt="{{ $relatedProduct->name }}" class="w-full h-full object-cover">
                                 @else
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -528,11 +725,11 @@
                                 </h3>
                                 <div class="flex items-center justify-between">
                                     <span class="font-bold text-primary-600">
-                                        {{ number_format($relatedProduct->sale_price ?? $relatedProduct->price, 2) }} MAD
+                                        ₦{{ number_format($relatedProduct->sale_price ?? $relatedProduct->price, 0) }}
                                     </span>
                                     @if($relatedProduct->sale_price && $relatedProduct->sale_price < $relatedProduct->price)
                                         <span class="text-sm text-gray-500 line-through">
-                                            {{ number_format($relatedProduct->price, 2) }} MAD
+                                            ₦{{ number_format($relatedProduct->price, 0) }}
                                         </span>
                                     @endif
                                 </div>

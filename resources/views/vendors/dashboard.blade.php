@@ -54,20 +54,25 @@
     </div>
 
     <!-- Wallet Balance -->
-    <a href="{{ route('vendor.wallet.index') }}" class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white hover:from-green-600 hover:to-green-700 transition-all block">
+    <a href="{{ route('vendor.wallet.index') }}" class="bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600 rounded-2xl shadow-lg p-6 text-white hover:shadow-xl hover:from-emerald-600 hover:via-green-600 hover:to-teal-700 transition-all duration-300 block border-2 border-green-400/30">
         <div class="flex items-center justify-between mb-4">
-            <div class="p-3 bg-white/20 rounded-xl">
+            <div class="p-3 bg-white/25 backdrop-blur-sm rounded-xl shadow-inner">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
                 </svg>
             </div>
-            <svg class="h-5 w-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="h-5 w-5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
         </div>
-        <h3 class="text-3xl font-bold">₦{{ number_format($vendor->wallet_balance ?? 0, 2) }}</h3>
-        <p class="text-sm text-white/90 font-medium">Wallet Balance</p>
-        <p class="text-xs text-white/70 mt-2">Click to manage wallet</p>
+        <h3 class="text-3xl font-bold drop-shadow-sm">₦{{ number_format($vendor->wallet_balance ?? 0, 2) }}</h3>
+        <p class="text-sm text-white font-medium mt-1">Wallet Balance</p>
+        <p class="text-xs text-white/80 mt-2 flex items-center">
+            <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            </svg>
+            Click to manage wallet
+        </p>
     </a>
 </div>
 

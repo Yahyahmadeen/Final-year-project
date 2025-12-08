@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@eProShop.com',
             'password' => Hash::make('password'),
             'role' => 'admin',
+            'status'=>'active',
             'email_verified_at' => now(),
         ]);
 
@@ -58,6 +59,7 @@ class DatabaseSeeder extends Seeder
                 'email' => $data['email'],
                 'password' => Hash::make('password123'),
                 'role' => 'vendor',
+                'status' => 'active',
                 'email_verified_at' => now(),
             ]);
 
@@ -78,6 +80,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'customer@eProShop.com',
             'password' => Hash::make('password'),
             'role' => 'customer',
+            'status'=>'active',
             'email_verified_at' => now(),
         ]);
 

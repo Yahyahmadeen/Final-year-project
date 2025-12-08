@@ -8,7 +8,7 @@ use App\Models\Product;
 
 class ProductImage extends Model
 {
-    protected $fillable = ['product_id', 'path'];
+    protected $fillable = ['product_id', 'path', 'is_primary', 'alt_text', 'sort_order'];
 
     public function product()
     {

@@ -28,7 +28,7 @@ class ProductController extends Controller
         }
 
         // Get related products from same category
-        $relatedProducts = Product::with(['vendor', 'category'])
+        $relatedProducts = Product::with(['vendor', 'category', 'imagesFirst', 'images'])
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->where('status', 'published')
