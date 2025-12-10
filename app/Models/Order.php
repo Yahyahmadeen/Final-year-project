@@ -32,6 +32,10 @@ class Order extends Model
         'notes',
         'shipped_at',
         'delivered_at',
+        'tracking_number',
+        'carrier',
+        'estimated_delivery',
+        'processing_started_at',
     ];
 
     protected function casts(): array
@@ -47,6 +51,8 @@ class Order extends Model
             'billing_address' => 'array',
             'shipped_at' => 'datetime',
             'delivered_at' => 'datetime',
+            'estimated_delivery' => 'datetime',
+            'processing_started_at' => 'datetime',
         ];
     }
 

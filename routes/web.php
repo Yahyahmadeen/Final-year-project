@@ -33,6 +33,10 @@ Route::post('/vendors/register', [VendorController::class, 'store'])->name('vend
 Route::get('/vendors/{vendor:slug}', [VendorController::class, 'show'])->name('vendors.show');
 Route::get('/about', [PageController::class, 'about'])->name('about');
 
+// Public Order Tracking Routes
+Route::get('/track-order', [OrderController::class, 'track'])->name('orders.track');
+Route::post('/track-order', [OrderController::class, 'track'])->name('orders.track.search');
+
 // Admin Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->name('dashboard');

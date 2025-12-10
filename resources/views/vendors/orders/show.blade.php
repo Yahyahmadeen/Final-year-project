@@ -51,7 +51,7 @@
                 @foreach($vendorItems as $item)
                 <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
                     <div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                        @if($item->product && $item->product->images->isNotEmpty())
+                        @if($item->product && $item->product->images && $item->product->images->isNotEmpty())
                             <img src="{{ asset('storage/' . $item->product->images->first()->path) }}" alt="{{ $item->product->name }}" class="w-full h-full object-cover">
                         @else
                             <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,16 +86,38 @@
         <!-- Shipping Address -->
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
             <h2 class="text-xl font-bold text-secondary-800 mb-4">Shipping Address</h2>
-            @if($order->address)
+            @if($order->shipping_address)
             <div class="space-y-2 text-gray-700">
-                <p class="font-medium">{{ $order->address->full_name }}</p>
-                <p>{{ $order->address->address_line1 }}</p>
-                @if($order->address->address_line2)
-                <p>{{ $order->address->address_line2 }}</p>
+                @if(is_array($order->shipping_address))
+                    @if(isset($order->shipping_address['name']))
+                        <p class="font-medium">{{ $order->shipping_address['name'] }}</p>
+                    @endif
+                    @if(isset($order->shipping_address['address']))
+                        <p>{{ $order->shipping_address['address'] }}</p>
+                    @endif
+                    @if(isset($order->shipping_address['address_line_1']))
+                        <p>{{ $order->shipping_address['address_line_1'] }}</p>
+                    @endif
+                    @if(isset($order->shipping_address['address_line_2']) && $order->shipping_address['address_line_2'])
+                        <p>{{ $order->shipping_address['address_line_2'] }}</p>
+                    @endif
+                    @if(isset($order->shipping_address['city']) || isset($order->shipping_address['state']))
+                        <p>
+                            @if(isset($order->shipping_address['city'])){{ $order->shipping_address['city'] }}@endif
+                            @if(isset($order->shipping_address['city']) && isset($order->shipping_address['state']))), @endif
+                            @if(isset($order->shipping_address['state'])){{ $order->shipping_address['state'] }}@endif
+                            @if(isset($order->shipping_address['postal_code'])) {{ $order->shipping_address['postal_code'] }}@endif
+                        </p>
+                    @endif
+                    @if(isset($order->shipping_address['country']))
+                        <p>{{ $order->shipping_address['country'] }}</p>
+                    @endif
+                    @if(isset($order->shipping_address['phone']))
+                        <p class="pt-2 border-t border-gray-200 mt-2">Phone: {{ $order->shipping_address['phone'] }}</p>
+                    @endif
+                @else
+                    <p class="text-gray-700">{{ $order->shipping_address }}</p>
                 @endif
-                <p>{{ $order->address->city }}, {{ $order->address->state }} {{ $order->address->postal_code }}</p>
-                <p>{{ $order->address->country }}</p>
-                <p class="pt-2 border-t border-gray-200 mt-2">Phone: {{ $order->address->phone }}</p>
             </div>
             @else
             <p class="text-gray-500">No shipping address provided</p>

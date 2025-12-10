@@ -64,7 +64,7 @@ class VendorOrderController extends Controller
     {
         $vendor = Auth::user()->vendor;
         
-        $order = Order::with(['user', 'items.product', 'address'])
+        $order = Order::with(['user', 'items.product.images'])
             ->whereHas('items', function($q) use ($vendor) {
                 $q->whereHas('product', function($pq) use ($vendor) {
                     $pq->where('vendor_id', $vendor->id);

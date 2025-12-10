@@ -46,6 +46,12 @@ class CartController extends Controller
 
         // Check if product is available
         if (!$product->isInStock()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Product is out of stock.'
+                ], 400);
+            }
             return back()->withErrors(['cart' => 'Product is out of stock.']);
         }
 
@@ -59,6 +65,12 @@ class CartController extends Controller
             
             // Check stock availability
             if ($product->manage_stock && $newQuantity > $product->stock_quantity) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Not enough stock available.'
+                    ], 400);
+                }
                 return back()->withErrors(['cart' => 'Not enough stock available.']);
             }
 
@@ -69,6 +81,12 @@ class CartController extends Controller
         } else {
             // Check stock availability for new item
             if ($product->manage_stock && $request->quantity > $product->stock_quantity) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Not enough stock available.'
+                    ], 400);
+                }
                 return back()->withErrors(['cart' => 'Not enough stock available.']);
             }
 
@@ -77,6 +95,17 @@ class CartController extends Controller
                 'product_id' => $request->product_id,
                 'quantity' => $request->quantity,
                 'options' => $request->options,
+            ]);
+        }
+
+        // Get updated cart count
+        $cartCount = CartItem::where('user_id', auth()->id())->sum('quantity');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Product added to cart successfully!',
+                'cart_count' => $cartCount
             ]);
         }
 

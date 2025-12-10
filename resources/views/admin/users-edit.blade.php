@@ -68,7 +68,7 @@
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                             required>
                         <option value="active" {{ old('status', $user->status) === 'active' ? 'selected' : '' }}>Active</option>
-                        <option value="inactive" {{ old('status', $user->status) === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        <option value="pending" {{ old('status', $user->status) === 'inactive' ? 'pending' : '' }}>Inactive</option>
                         <option value="suspended" {{ old('status', $user->status) === 'suspended' ? 'selected' : '' }}>Suspended</option>
                     </select>
                     <p class="text-xs text-gray-500 mt-1">Control user's access to the platform</p>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
@@ -103,10 +104,14 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => [
+            'required',
+            'email',
+            Rule::unique('users', 'email')->ignore($user->id),
+                ],
             'role' => 'required|in:customer,vendor,admin',
-            'status' => 'required|in:active,inactive,suspended',
-        ]);
+            'status' => 'required|in:active,pending,suspended',
+            ]);
 
         $user->update($validated);
 

@@ -7,6 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
     @stack('extra_head')
 </head>
 <body class="bg-secondary-50">
@@ -116,13 +120,62 @@
                     </button>
 
                     <!-- User Menu -->
-                    <div class="flex items-center space-x-3">
-                        <div class="text-right">
-                            <p class="text-sm font-semibold text-secondary-800">{{ auth()->user()->name ?? 'Admin' }}</p>
-                            <p class="text-xs text-secondary-500">Administrator</p>
-                        </div>
-                        <div class="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold">
-                            {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
+                    <div class="relative" x-data="{ profileOpen: false }">
+                        <button @click="profileOpen = !profileOpen" class="flex items-center space-x-3 hover:bg-gray-50 rounded-lg p-2 transition-colors" :aria-expanded="profileOpen">
+                            <div class="text-right">
+                                <p class="text-sm font-semibold text-secondary-800">{{ auth()->user()->name ?? 'Admin' }}</p>
+                                <p class="text-xs text-secondary-500">Administrator</p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold">
+                                {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
+                            </div>
+                            <svg class="w-4 h-4 text-secondary-400" :class="{'rotate-180': profileOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div x-show="profileOpen" 
+                             @click.away="profileOpen = false"
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="transform opacity-0 scale-95"
+                             x-transition:enter-end="transform opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="transform opacity-100 scale-100"
+                             x-transition:leave-end="transform opacity-0 scale-95"
+                             class="absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+                             style="display: none;">
+                            <div class="py-2">
+                                <div class="px-4 py-3 border-b border-gray-100">
+                                    <p class="text-sm font-medium text-gray-900">{{ auth()->user()->name }}</p>
+                                    <p class="text-sm text-gray-500">{{ auth()->user()->email }}</p>
+                                </div>
+                                
+                                <a href="{{ route('profile.edit') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-user w-4 mr-3 text-gray-400"></i>
+                                    Your Profile
+                                </a>
+                                
+                                <a href="{{ route('admin.settings') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-cog w-4 mr-3 text-gray-400"></i>
+                                    Settings
+                                </a>
+                                
+                                <div class="border-t border-gray-100 my-1"></div>
+                                
+                                <a href="{{ route('home') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-home w-4 mr-3 text-gray-400"></i>
+                                    Back to Site
+                                </a>
+                                
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                        <i class="fas fa-sign-out-alt w-4 mr-3 text-red-400"></i>
+                                        Sign Out
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>

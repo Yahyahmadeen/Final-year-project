@@ -38,6 +38,24 @@
         .payment-status-cooperative_rejected {
             @apply bg-red-100 text-red-800 border-red-200;
         }
+        .tracking-step-completed {
+            @apply bg-green-100 border-green-200 text-green-800;
+        }
+        .tracking-step-current {
+            @apply bg-blue-100 border-blue-200 text-blue-800;
+        }
+        .tracking-step-pending {
+            @apply bg-gray-100 border-gray-200 text-gray-500;
+        }
+        .tracking-step-cancelled {
+            @apply bg-red-100 border-red-200 text-red-800;
+        }
+        .tracking-line-completed {
+            @apply bg-green-500;
+        }
+        .tracking-line-pending {
+            @apply bg-gray-300;
+        }
     </style>
 @endpush
 
@@ -100,6 +118,69 @@
                             <p class="font-mono text-sm text-secondary-800">{{ $order->payment_reference }}</p>
                         </div>
                     @endif
+                </div>
+
+                <!-- Order Tracking Timeline -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-secondary-800 mb-6">Order Progress</h3>
+                    
+                    <div class="relative">
+                        @foreach($trackingSteps as $index => $step)
+                            <div class="flex items-start mb-8 last:mb-0">
+                                <!-- Step Icon -->
+                                <div class="flex-shrink-0 relative">
+                                    <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center
+                                        @if(isset($step['is_cancelled'])) tracking-step-cancelled
+                                        @elseif($step['completed']) tracking-step-completed
+                                        @elseif($loop->first && !$step['completed']) tracking-step-current
+                                        @else tracking-step-pending
+                                        @endif">
+                                        @if($step['icon'] === 'shopping-cart')
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                            </svg>
+                                        @elseif($step['icon'] === 'credit-card')
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                            </svg>
+                                        @elseif($step['icon'] === 'truck')
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        @elseif($step['icon'] === 'check-circle')
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        @elseif($step['icon'] === 'x-circle')
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        @endif
+                                    </div>
+                                    
+                                    <!-- Connecting Line -->
+                                    @if(!$loop->last)
+                                        <div class="absolute top-10 left-1/2 transform -translate-x-1/2 w-0.5 h-12 
+                                            @if($step['completed'] && !isset($step['is_cancelled'])) tracking-line-completed
+                                            @else tracking-line-pending
+                                            @endif">
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <!-- Step Content -->
+                                <div class="ml-4 flex-1">
+                                    <h4 class="font-semibold text-secondary-800 mb-1">{{ $step['title'] }}</h4>
+                                    <p class="text-sm text-gray-600 mb-1">{{ $step['description'] }}</p>
+                                    @if($step['date'])
+                                        <p class="text-xs text-gray-500">
+                                            {{ $step['date']->format('M j, Y \a\t g:i A') }}
+                                        </p>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
 
                 <!-- Order Items -->
