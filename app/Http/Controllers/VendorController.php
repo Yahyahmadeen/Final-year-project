@@ -196,20 +196,20 @@ class VendorController extends Controller
             ];
             
             // Get recent orders
-            $recent_orders = \App\Models\Order::with(['user', 'items'])
+            $recentOrders = \App\Models\Order::with(['user', 'items'])
                 ->where('vendor_id', $vendor->id)
                 ->latest()
                 ->take(5)
                 ->get() ?? collect();
             
             // Get recent products
-            $recent_products = \App\Models\Product::where('vendor_id', $vendor->id)
+            $recentProducts = \App\Models\Product::where('vendor_id', $vendor->id)
                 ->latest()
                 ->take(5)
                 ->get() ?? collect();
             
             // Get recent reviews
-            $recent_reviews = \App\Models\ProductReview::whereHas('product', function($query) use ($vendor) {
+            $recentReviews = \App\Models\ProductReview::whereHas('product', function($query) use ($vendor) {
                     $query->where('vendor_id', $vendor->id);
                 })
                 ->with(['user', 'product'])
@@ -217,13 +217,15 @@ class VendorController extends Controller
                 ->take(5)
                 ->get() ?? collect();
 
-            // Get wallet balance
-            $wallet_balance = \App\Models\WalletTransaction::where('vendor_id', $vendor->id)
-                ->latest('id')
-                ->value('balance_after') ?? 0;
+            // Get wallet balance from VendorWallet
+            $vendorWallet = \App\Models\VendorWallet::firstOrCreate(
+                ['vendor_id' => $vendor->id],
+                ['balance' => 0]
+            );
+            $walletBalance = $vendorWallet->balance ?? 0;
             
-            // Get recent transactions
-            $recent_transactions = \App\Models\WalletTransaction::where('vendor_id', $vendor->id)
+            // Get recent transactions from VendorWalletTransaction
+            $recentTransactions = \App\Models\VendorWalletTransaction::where('vendor_wallet_id', $vendorWallet->id)
                 ->latest()
                 ->take(5)
                 ->get() ?? collect();
@@ -419,49 +421,8 @@ class VendorController extends Controller
     // }
 
     /**
-        
-        // Clear the session data
-        $request->session()->forget(['vendor_data', 'current_step']);
-        
-        return redirect()->route('vendors.index')
-            ->with('success', 'Your vendor application has been submitted successfully! We will review your application and notify you once approved.');
-    //             return redirect()->route('dashboard')
-    //                 ->with('error', 'You already have a vendor account.');
-    //         }
-            
-    //         // Create the vendor
-    //         $vendor = new Vendor([
-    //             'user_id' => auth()->id(),
-    //             'store_name' => $vendorData['store_name'],
-    //             'slug' => Str::slug($vendorData['store_name']),
-    //             'description' => $vendorData['description'],
-    //             'business_type' => $vendorData['business_type'],
-    //             'phone' => $vendorData['phone'],
-    //             'email' => $vendorData['email'] ?? null,
-    //             'address' => $vendorData['address'],
-    //             'city' => $vendorData['city'] ?? null,
-    //             'postal_code' => $vendorData['postal_code'] ?? null,
-    //             'business_registration_number' => $vendorData['business_registration_number'] ?? null,
-    //             'status' => 'pending',
-    //         ]);
-            
-    //         // Save the vendor
-    //         $vendor->save();
-            
-    //         // Update user role to vendor
-    //         if (auth()->check()) {
-    //             auth()->user()->update(['role' => 'vendor']);
-    //         }
-            
-    //         // Clear the session data
-    //         $request->session()->forget(['vendor_data', 'current_step']);
-            
-    //         return redirect()->route('vendors.index')
-    //             ->with('success', 'Your vendor application has been submitted successfully! We will review your application and notify you once approved.');
-    //     }
-    // }
     
-    /**
+    
      * Get validation rules for the current step.
      *
      * @param  int  $step

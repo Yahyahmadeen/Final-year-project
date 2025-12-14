@@ -17,8 +17,15 @@ class UserWalletController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $wallet = $user->wallet;
-        $transactions = $wallet ? $wallet->transactions()->latest()->paginate(10) : collect();
+        
+        // Get or create wallet
+        $wallet = UserWallet::firstOrCreate(
+            ['user_id' => $user->id],
+            ['balance' => 0]
+        );
+        
+        // Get paginated transactions
+        $transactions = $wallet->transactions()->latest()->paginate(10);
 
         return view('wallet.index', compact('wallet', 'transactions'));
     }

@@ -65,7 +65,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
         </div>
-        <h3 class="text-3xl font-bold drop-shadow-sm">₦{{ number_format($vendor->wallet_balance ?? 0, 2) }}</h3>
+        <h3 class="text-3xl font-bold drop-shadow-sm">₦{{ number_format($walletBalance ?? 0, 2) }}</h3>
         <p class="text-sm text-white font-medium mt-1">Wallet Balance</p>
         <p class="text-xs text-white/80 mt-2 flex items-center">
             <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,7 +131,7 @@
             <a href="{{ route('vendor.products.edit', $product->id) }}" class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                 <div class="flex items-center space-x-4 flex-1">
                     <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
-                        @if($product->images->isNotEmpty())
+                        @if($product->images?->isNotEmpty())
                             <img src="{{ asset('storage/' . $product->images->first()->path) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
                         @else
                             <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

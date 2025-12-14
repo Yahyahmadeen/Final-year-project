@@ -38,7 +38,7 @@
                                    class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 pr-12 sm:text-sm border-gray-300 rounded-lg py-3" 
                                    placeholder="0.00" 
                                    min="100" 
-                                   step="100" 
+                                   step="1" 
                                    required>
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500 sm:text-sm">NGN</span>
@@ -116,11 +116,9 @@
         // Format amount input
         amountInput.addEventListener('input', function(e) {
             // Ensure minimum amount of 100
-            if (this.value < 100) {
+            if (this.value && this.value < 100) {
                 this.value = 100;
             }
-            // Round to nearest 100
-            this.value = Math.round(this.value / 100) * 100;
         });
 
         // Handle payment button click

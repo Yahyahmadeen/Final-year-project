@@ -48,7 +48,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/payments', [\App\Http\Controllers\AdminController::class, 'payments'])->name('payments');
     Route::get('/reports', [\App\Http\Controllers\AdminController::class, 'reports'])->name('reports');
     Route::get('/settings', [\App\Http\Controllers\AdminController::class, 'settings'])->name('settings');
-    // Add other admin routes here
+    
+    // Vendor Payout Management
+    Route::get('/payouts', [\App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('payouts.index');
+    Route::get('/payouts/{payout}', [\App\Http\Controllers\Admin\PayoutController::class, 'show'])->name('payouts.show');
+    Route::post('/payouts/{payout}/approve', [\App\Http\Controllers\Admin\PayoutController::class, 'approve'])->name('payouts.approve');
+    Route::post('/payouts/{payout}/reject', [\App\Http\Controllers\Admin\PayoutController::class, 'reject'])->name('payouts.reject');
 });
 
 // Authenticated Routes
@@ -159,7 +164,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::prefix('products')->name('products.')->group(function () {
             Route::get('/create', [VendorProductController::class, 'create'])->name('create');
             Route::post('/', [VendorProductController::class, 'store'])->name('store');
-            // Add other product routes as needed
+            Route::get('/{product}/edit', [VendorProductController::class, 'edit'])->name('edit');
+            Route::put('/{product}', [VendorProductController::class, 'update'])->name('update');
+            Route::delete('/{product}', [VendorProductController::class, 'destroy'])->name('destroy');
         });
     
         // ... rest of your vendor routes ...

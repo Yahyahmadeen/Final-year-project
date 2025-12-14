@@ -12,7 +12,7 @@
 <!-- Wallet Stats -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
     <!-- Available Balance -->
-    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white">
+    <div class="bg-green-500 bg-green-600 rounded-2xl shadow-lg p-6 text-white">
         <div class="flex items-center justify-between mb-4">
             <div class="p-3 bg-white/20 rounded-xl">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

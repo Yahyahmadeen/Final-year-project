@@ -13,14 +13,14 @@
         const errorText = document.getElementById('error-text');
         
         // Format amount input
-        amountInput.addEventListener('input', function(e) {
-            // Ensure minimum amount of 100
-            if (this.value < 100) {
-                this.value = 100;
-            }
-            // Round to nearest 100
-            this.value = Math.round(this.value / 100) * 100;
-        });
+        // amountInput.addEventListener('input', function(e) {
+        //     // Ensure minimum amount of 100
+        //     if (this.value < 100) {
+        //         this.value = 100;
+        //     }
+        //     // Round to nearest 100
+        //     this.value = Math.round(this.value / 100) * 100;
+        // });
 
         // Handle payment button click
         payButton.addEventListener('click', function() {
@@ -119,7 +119,7 @@
                 @csrf
                 <div>
                     <label for="amount_fund" class="sr-only">Amount</label>
-                    <input type="number" name="amount" id="amount_fund" min="100" step="100" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="Enter amount (min: ₦100)" required>
+                    <input type="number" name="amount" id="amount_fund" min="100" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="Enter amount (min: ₦100)" required>
                 </div>
                 <button type="button" id="pay-button" class="mt-4 w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 flex items-center justify-center">
                     <span id="button-text">Fund with Paystack</span>

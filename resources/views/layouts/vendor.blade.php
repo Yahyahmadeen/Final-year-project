@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Vendor Dashboard') - nShop</title>
+    <title>@yield('title', 'Vendor Dashboard') - eProShop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -61,7 +61,7 @@
                 </button>
                 <a href="{{ route('vendor.dashboard') }}" class="flex items-center space-x-3">
                     <!-- Logo Image - Replace with your actual logo -->
-                    <img src="{{ asset('images/real_logo_nShop-removebg-preview.png') }}" alt="nShop Logo" class="h-10 w-auto" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <img src="{{ asset('images/real_logo_eProShop-removebg-preview.png') }}" alt="eProShop Logo" class="h-10 w-auto" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     <!-- Fallback Icon if logo doesn't exist -->
                     <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center" style="display: none;">
                         <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,7 +69,7 @@
                         </svg>
                     </div>
                     <div class="hidden sm:block">
-                        <h1 class="text-xl font-bold text-secondary-800">nShop</h1>
+                        <h1 class="text-xl font-bold text-secondary-800">eProShop</h1>
                         <p class="text-xs text-gray-600">Vendor Dashboard</p>
                     </div>
                 </a>

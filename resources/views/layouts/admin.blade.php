@@ -84,6 +84,12 @@
                 <span class="ml-3">Payments</span>
             </a>
 
+            <a href="{{ route('admin.payouts.index') }}" class="flex items-center px-4 py-3 rounded-lg hover:bg-secondary-800 transition @if(request()->routeIs('admin.payouts.*')) bg-secondary-800 border-l-4 border-primary-500 @endif">
+                <i class="fas fa-money-bill-transfer w-5"></i>
+                <span class="ml-3">Vendor Payouts</span>
+                <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">New</span>
+            </a>
+
             <a href="{{ route('admin.reports') }}" class="flex items-center px-4 py-3 rounded-lg hover:bg-secondary-800 transition @if(request()->routeIs('admin.reports')) bg-secondary-800 border-l-4 border-primary-500 @endif">
                 <i class="fas fa-chart-bar w-5"></i>
                 <span class="ml-3">Reports</span>
